@@ -1,4 +1,4 @@
-git-all
+git
 nano
 curl
 cmake

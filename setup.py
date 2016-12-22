@@ -1,4 +1,13 @@
+from distutils.command.install import install as DistutilsInstall
+from distutils.core import setup
 import subprocess
+import shutil
+
+HTCONDOR_GIT_URL = 'https://github.com/htcondor/htcondor.git'
+CONFIGURE_SCRIPT = 'configure_minimal'
+HTCONDOR_TMP = 'tmp'
+HTCONDOR_PACKAGES = ['htcondor', 'classad_module']
+
 
 def condor_version():
     '''
@@ -9,29 +18,78 @@ def condor_version():
     version = output.split(' ')[1]
     return version
 
+__version__ = condor_version()
+
+
+def checkout_version(condor_version):
+    # git clone https://github.com/htcondor/htcondor.git tmp
+    # cd tmp
+    # git checkout <correct versiontag> # e.g. tag format = V8_1_4
+    # but condor version output is 8.4.10
+    git_tag = 'V{0}_{1}_{2}'.format(*condor_version.split('.'))
+    commands = [
+
+        'git clone {HTCONDOR_GIT_URL} {HTCONDOR_TMP}',
+        'cp -p {CONFIGURE_SCRIPT} {HTCONDOR_TMP}/.',
+        'cd {HTCONDOR_TMP}',
+        'git checkout {git_tag}',
+
+    ]
+    all_in_one = ' && '.join(commands)
+    all_in_one = all_in_one.format(
+        HTCONDOR_GIT_URL=HTCONDOR_GIT_URL,
+        HTCONDOR_TMP=HTCONDOR_TMP,
+        CONFIGURE_SCRIPT=CONFIGURE_SCRIPT,
+        git_tag=git_tag,
+    )
+
+    subprocess.call(all_in_one, shell=True)
+
+
 def compile_python_bindings():
-    commands = ['./configure_minimal', 'cd src/python-bindings', ['make']]
+    commands = [
+        'cd {HTCONDOR_TMP}',
+        './{CONFIGURE_SCRIPT}',
+        'make {PACKAGES}',
+    ]
+    all_in_one = ' && '.join(commands)
+    all_in_one = all_in_one.format(
+        HTCONDOR_TMP=HTCONDOR_TMP,
+        CONFIGURE_SCRIPT=CONFIGURE_SCRIPT,
+        PACKAGES=' '.join(HTCONDOR_PACKAGES),
+    )
+    subprocess.call(all_in_one, shell=True)
 
 
-#from distutils.command.install import install as DistutilsInstall
+class HTCondorInstall(DistutilsInstall):
 
-#class MyInstall(DistutilsInstall):
-#    def run(self):
-#        do_pre_install_stuff()
-#        DistutilsInstall.run(self)
-#        do_post_install_stuff()
-#
-#...
+    def run(self):
+        self._pre_install()
+        self._install()
+        self._post_install()
 
-#setup(..., cmdclass={'install': MyInstall}, ...)
+    def _pre_install(self):
+        checkout_version(__version__)
 
-# or
-#from distutils.core import setup, Extension
+    def _install(self):
+        '''
+        need to copy
+        ./src/python-bindings/classad.so
+        ./src/python-bindings/htcondor.so
+        to site-packages
+        and
+        ./src/python-bindings/libpyclassad2.7_8_5_9.so
+        ./src/condor_utils/libcondor_utils_8_5_9.so
+        ./bld_external/classads-8.5.9/install/lib/libclassad.so
+        to /usr/lib
+        '''
+        compile_python_bindings()
 
-#module1 = Extension('demo',
-#                    sources = ['demo.c'])
+    def _post_install(self):
+        shutil.rmtree(HTCONDOR_TMP)
 
-#setup (name = 'PackageName',
-#version = '1.0',
-#description = 'This is a demo package',
-#ext_modules = [module1])
+setup(
+    cmdclass={
+        'install': HTCondorInstall,
+    }
+)
