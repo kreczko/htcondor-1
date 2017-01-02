@@ -69,6 +69,7 @@ class HTCondorInstall(DistutilsInstall):
         self._post_install()
 
     def _pre_install(self):
+        print('Found installed condor version "{0}"'.format(__version__))
         checkout_version(__version__)
 
     def _install(self):
@@ -78,9 +79,9 @@ class HTCondorInstall(DistutilsInstall):
         ./src/python-bindings/htcondor.so
         to site-packages
         and
-        ./src/python-bindings/libpyclassad2.7_8_5_9.so
-        ./src/condor_utils/libcondor_utils_8_5_9.so
-        ./bld_external/classads-8.5.9/install/lib/libclassad.so
+        ./src/python-bindings/libpyclassad2.7_X_Y_X.so
+        ./src/condor_utils/libcondor_utils_X_Y_Z.so
+        ./bld_external/classads-X.Y.Z/install/lib/libclassad.so
         to /usr/lib
         '''
         compile_python_bindings()
