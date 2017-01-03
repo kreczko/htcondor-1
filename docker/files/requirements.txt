@@ -8,3 +8,7 @@ libcurl4-openssl-dev
 python-dev
 libpcre3
 libpcre3-dev
+python-pip
+libxml2-dev
+uuid-dev
+patch

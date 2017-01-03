@@ -1,0 +1,25 @@
+FROM centos:7
+
+RUN yum update -y
+
+# install requirements
+COPY files/requirements.centos /tmp/requirements.txt
+COPY files/condor /etc/condor
+COPY files/keyboard /etc/default/keyboard
+COPY files/console-setup /etc/default/console-setup
+
+RUN yum install $(grep -vE "^\s*#" /tmp/requirements.txt  | tr "\n" " ") -y
+RUN yum install -y https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+RUN yum install -y condor
+RUN yum clean all
+
+RUN git clone https://github.com/kreczko/htcondor-1.git /opt/htcondor && \
+  cd /opt/htcondor && \
+  git checkout worlds-weirdest-setup.py
+
+WORKDIR /opt/htcondor
+
+#RUN CMAKE_INCLUDE_PATH=$PWD/condor-prefix/usr/include CMAKE_LIBRARY_PATH=$PWD/condor-prefix/usr/lib64 ./configure_minimal && \
+#  make htcondor classad_module
+RUN yum install patch -y
+RUN python setup.py install

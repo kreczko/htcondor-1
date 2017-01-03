@@ -1,0 +1,15 @@
+git
+nano
+curl
+make
+cmake
+gcc
+gcc-c++
+openssl-devel
+libcurl-devel
+python-devel
+pcre2
+pcre2-devel
+python-pip
+libuuid-devel
+libxml2-devel

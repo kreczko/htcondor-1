@@ -1,0 +1,33 @@
+version: "2"
+
+services:
+  htcondor-ubuntu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: kreczko/htcondor-dev:ubuntu
+  htcondor-centos6:
+    build:
+      context: .
+      dockerfile: Dockerfile.centos6
+    image: kreczko/htcondor-dev:centos6
+  htcondor-centos7:
+    build:
+      context: .
+      dockerfile: Dockerfile.centos7
+    image: kreczko/htcondor-dev:centos7
+  htcondor-conda:
+    build:
+      context: .
+      dockerfile: Dockerfile.conda
+    image: kreczko/htcondor-dev:conda
+  htcondor-conda3:
+    build:
+      context: .
+      dockerfile: Dockerfile.conda3
+    image: kreczko/htcondor-dev:conda3
+  htcondor-virtualenv:
+    build:
+      context: .
+      dockerfile: Dockerfile.virtualenv
+    image: kreczko/htcondor-dev:virtualenv
