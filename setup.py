@@ -65,17 +65,20 @@ def checkout_version(condor_version):
 def compile_python_bindings():
     commands = [
         'cd {HTCONDOR_TMP}',
-        './{CONFIGURE_SCRIPT}',
+        '{UBUNTU_ENV} ./{CONFIGURE_SCRIPT}',
         'make {PACKAGES}',
     ]
+    UBUNTU_ENV = ''
     if platform.dist()[0].lower() == 'ubuntu':
         commands.insert(
             1, 'curl http://t2.unl.edu/store/sources/condor-prefix.tar.gz | tar zxv')
+        UBUNTU_ENV = 'CMAKE_INCLUDE_PATH=$PWD/condor-prefix/usr/include'
     all_in_one = ' && '.join(commands)
     all_in_one = all_in_one.format(
         HTCONDOR_TMP=HTCONDOR_TMP,
         CONFIGURE_SCRIPT=CONFIGURE_SCRIPT,
         PACKAGES=' '.join(HTCONDOR_PACKAGES),
+        UBUNTU_ENV=UBUNTU_ENV
     )
     subprocess.call(all_in_one, shell=True)
 
