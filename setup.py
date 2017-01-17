@@ -28,7 +28,7 @@ def condor_version():
     output = p.communicate()[0]
     if not p.returncode == 0:
         raise RuntimeWarning(
-            'Something went wrong during call of `condor_version`\n Is htcondor installed?')
+            'Something went wrong during call of `condor_version`.\n Is htcondor installed?')
     version = output.split(' ')[1]
     return version
 
@@ -47,6 +47,8 @@ def checkout_version(condor_version):
         'cp -p {CONFIGURE_SCRIPT} {HTCONDOR_TMP}/.',
         'cd {HTCONDOR_TMP}',
         'git checkout {git_tag}',
+        # fix WITH_KRB5 flag
+        'git cherry-pick 21532c3a933e55dd2da870b95f362a92b98fca04',
 
     ]
     all_in_one = ' && '.join(commands)
